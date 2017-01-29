@@ -20,9 +20,12 @@ namespace FlowSolver
     /// </summary>
     public partial class MainWindow : Window
     {
+        FlowBoard game = new FlowBoard();
+
         public MainWindow()
         {
             InitializeComponent();
+            Gameboard.Initialize(game);
         }
     }
 }
