@@ -33,7 +33,8 @@ namespace FlowSolver
             Yellow,
             Cyan,
             Orange,
-            Magenta
+            Magenta,
+            DontUse
         };
 
         public event PropertyChangedEventHandler PropertyChanged;

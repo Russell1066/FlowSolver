@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,11 +22,17 @@ namespace FlowSolver
     public partial class MainWindow : Window
     {
         FlowBoard game = new FlowBoard();
+        Solver ai;
 
         public MainWindow()
         {
             InitializeComponent();
             Gameboard.Initialize(game);
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Task.Run(() => ai = new Solver(game));
         }
     }
 }

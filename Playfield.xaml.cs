@@ -58,10 +58,11 @@ namespace FlowSolver
 
         public void UpdateCell(int index)
         {
-            Debug.Assert(index >= 0 && index < Field.Children.Count);
-
             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
-                (Field.Children[index] as Rectangle).Fill = GetBrushColor(Board.Cells[index].CellColor)
+            {
+                Debug.Assert(index >= 0 && index < Field.Children.Count);
+                (Field.Children[index] as Rectangle).Fill = GetBrushColor(Board.Cells[index].CellColor);
+            }               
             ));
 
         }
@@ -90,6 +91,9 @@ namespace FlowSolver
 
                 case Cell.Color.Yellow:
                     return Brushes.Yellow;
+
+                case Cell.Color.DontUse:
+                    return Brushes.White;
 
                 default:
                     return Brushes.DarkGray;
