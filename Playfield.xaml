@@ -6,9 +6,12 @@
              xmlns:local="clr-namespace:FlowSolver"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+    <Grid Name="Overlay">
         <UniformGrid Rows="8" Columns="8" Name="Field">
-            <Rectangle HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2" Fill="#FFD11111"></Rectangle>
+            <local:CellView/>
+            <local:CellView/>
+            <local:CellView/>
+            <local:CellView/>
         </UniformGrid>
     </Grid>
 </UserControl>

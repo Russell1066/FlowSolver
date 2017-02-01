@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -32,7 +33,16 @@ namespace FlowSolver
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            Task.Run(() => ai = new Solver(game));
+            Task.Run(() => StartSolver());
+        }
+
+        private void StartSolver()
+        {
+            Stopwatch s = new Stopwatch();
+            s.Start();
+            ai = new Solver(game);
+            s.Stop();
+            Trace.WriteLine($"took : {s.Elapsed}");
         }
     }
 }

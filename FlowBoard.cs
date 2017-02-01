@@ -39,8 +39,8 @@ namespace FlowSolver
 
             foreach (var endPoint in Puzzle)
             {
-                Cells[PointToIndex(endPoint.Pt1)].CellColor = endPoint.FlowColor;
-                Cells[PointToIndex(endPoint.Pt2)].CellColor = endPoint.FlowColor;
+                Cells[PointToIndex(endPoint.Pt1)].MakeEndpoint(endPoint.FlowColor);
+                Cells[PointToIndex(endPoint.Pt2)].MakeEndpoint(endPoint.FlowColor);
             }
         }
 

@@ -54,7 +54,7 @@ namespace FlowSolver
             // Create the initial conditions
             SearchForcedPaths(nodes);
 
-            Search(nodes);
+            bool foundPaths = Search(nodes);
         }
 
         private bool Search(List<Node> nodes)
@@ -74,7 +74,7 @@ namespace FlowSolver
                 return false;
             }
 
-            List<Cell.Color> pushBoard = PushBoard();
+            var pushBoard = PushBoard();
 
             var node = nodes[0];
             var nodePath = GetNodePath(node);
@@ -98,7 +98,7 @@ namespace FlowSolver
                     return false;
                 }
 
-                if(!CanVisitAllCells(nodes))
+                if (!CanVisitAllCells(nodes))
                 {
                     return false;
                 }
@@ -215,11 +215,11 @@ namespace FlowSolver
             return retv;
         }
 
-        private void PopBoard(List<Cell.Color> pushBoard)
+        private void PopBoard(List<Cell.CellState> pushBoard)
         {
             for (int i = 0; i < pushBoard.Count; ++i)
             {
-                game.Cells[i].CellColor = pushBoard[i];
+                game.Cells[i].SetState(pushBoard[i]);
             }
 
             if (VisualDelay)
@@ -228,12 +228,12 @@ namespace FlowSolver
             }
         }
 
-        private List<Cell.Color> PushBoard()
+        private List<Cell.CellState> PushBoard()
         {
-            List<Cell.Color> pushBoard = new List<Cell.Color>();
+            var pushBoard = new List<Cell.CellState>();
             foreach (var cell in game.Cells)
             {
-                pushBoard.Add(cell.CellColor);
+                pushBoard.Add(cell.GetCellState());
             }
 
             return pushBoard;
@@ -255,9 +255,9 @@ namespace FlowSolver
             {
                 var node = nodes[0];
                 var move = node.Moves[0];
-                node.Path.Add(move);
 
-                MarkCell(game.Cells[move], node.Color);
+                game.Cells[move].Parent = game.Cells[node.Path.Last()];
+                node.Path.Add(move);
 
                 ClearMove(nodes, node, move);
 
@@ -271,21 +271,6 @@ namespace FlowSolver
             }
 
             return true;
-        }
-
-        private void MarkCell(Cell cell, Cell.Color color)
-        {
-            if (VisualDelay)
-            {
-                cell.CellColor = Cell.Color.DontUse;
-                Thread.Sleep(10);
-                cell.CellColor = color;
-                Thread.Sleep(10);
-            }
-            else
-            {
-                cell.CellColor = color;
-            }
         }
 
         private static void ClearMove(List<Node> nodes, Node node, int move)
