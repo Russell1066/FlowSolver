@@ -20,6 +20,7 @@ namespace FlowSolver
             Cyan,
             Orange,
             Magenta,
+            Brown,
             DontUse
         };
 

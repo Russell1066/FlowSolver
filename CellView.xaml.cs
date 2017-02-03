@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace FlowSolver
 {
@@ -25,6 +26,9 @@ namespace FlowSolver
         private Rectangle ConnectParent;
         private Rectangle ConnectChild;
         public event PropertyChangedEventHandler PropertyChanged;
+        private DateTime nextUpdate = DateTime.MinValue;
+        private const int PREUPDATEDELAY = 10;
+        private const int PREUPDATEOFFSET = 5;
 
         public CellView()
         {
@@ -52,8 +56,16 @@ namespace FlowSolver
 
         private void Cell_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ContextIdle, new Action(
-                () => UpdateCell(BackingCell.Parent, BackingCell.Child)));
+            // These happen a lot - don't let them stack up
+            // at the end, the fact that 100ms will have passed 
+            if (DateTime.Now > nextUpdate)
+            {
+                nextUpdate = DateTime.Now.AddMilliseconds(PREUPDATEDELAY - PREUPDATEOFFSET);
+                var delay = Task.Delay(PREUPDATEDELAY);
+                var updateCell = new Action(() => UpdateCell(BackingCell.Parent, BackingCell.Child));
+                var updateCellTask = new Action<Task>((t) => Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, updateCell));
+                delay.ContinueWith(updateCellTask);
+            }
         }
 
         private void UpdateCell(Cell parent, Cell child)
@@ -145,6 +157,9 @@ namespace FlowSolver
 
                 case Cell.Color.Yellow:
                     return Brushes.Yellow;
+
+                case Cell.Color.Brown:
+                    return Brushes.Brown;
 
                 case Cell.Color.DontUse:
                     return Brushes.White;
