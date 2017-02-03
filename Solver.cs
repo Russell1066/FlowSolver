@@ -28,17 +28,16 @@ namespace FlowSolver
 
             public int CompareTo(object obj)
             {
+                if(obj == null)
+                {
+                    return 1;
+                }
                 var rhs = obj as Node;
 
                 int retv = Moves.Count - rhs.Moves.Count;
                 if (retv == 0)
                 {
-                    retv = (int)Color - (int)(rhs.Color);
-                }
-
-                if (retv == 0)
-                {
-                    retv = Index - rhs.Index;
+                    retv = Path.Count - rhs.Path.Count;
                 }
 
                 return retv;
@@ -51,13 +50,10 @@ namespace FlowSolver
 
             List<Node> nodes = InitializeNodes();
 
-            // Create the initial conditions
-            SearchForcedPaths(nodes);
-
             bool foundPaths = Search(nodes);
         }
 
-        private bool Search(List<Node> nodes)
+        private bool Search(List<Node> nodes, Node previous = null)
         {
             if (IsGameWon(nodes))
             {
@@ -76,10 +72,14 @@ namespace FlowSolver
 
             var pushBoard = PushBoard();
 
-            var node = nodes[0];
+            var preferredNode = (from n in nodes
+                                where previous != null && previous.Color == n.Color && n.CompareTo(nodes[0]) == 0
+                                select n).FirstOrDefault();
+
+            var node = preferredNode ?? nodes[0];
             var nodePath = GetNodePath(node);
             nodePath.Reverse();
-            List<int> moves = GetMovesShortestFirst(nodes, nodePath);
+            List<int> moves = GetMovesShortestFirst(node, nodePath);
 
             foreach (var move in moves)
             {
@@ -103,12 +103,11 @@ namespace FlowSolver
                     return false;
                 }
 
-                if (Search(nodesCopy) == true)
+                if (Search(nodesCopy, node) == true)
                 {
                     return true;
                 }
             }
-
 
             return IsGameWon(nodes);
         }
@@ -157,9 +156,9 @@ namespace FlowSolver
             return true;
         }
 
-        private static List<int> GetMovesShortestFirst(List<Node> nodes, List<int> nodePath)
+        private static List<int> GetMovesShortestFirst(Node node, List<int> nodePath)
         {
-            var tempMoves = nodes[0].Moves.ToList();
+            var tempMoves = node.Moves.ToList();
             tempMoves.Remove(nodePath[1]);
             var moves = new List<int>() { nodePath[1] };
             moves.AddRange(tempMoves);
