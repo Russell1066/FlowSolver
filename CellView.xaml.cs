@@ -28,7 +28,7 @@ namespace FlowSolver
         public event PropertyChangedEventHandler PropertyChanged;
         private DateTime nextUpdate = DateTime.MinValue;
         private const int PREUPDATEDELAY = 10;
-        private const int PREUPDATEOFFSET = 5;
+        private const int PREUPDATEOFFSET = 1;
 
         public CellView()
         {
