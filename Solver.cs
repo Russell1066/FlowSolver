@@ -28,7 +28,7 @@ namespace FlowSolver
 
             public int CompareTo(object obj)
             {
-                if(obj == null)
+                if (obj == null)
                 {
                     return 1;
                 }
@@ -40,17 +40,34 @@ namespace FlowSolver
                     retv = Path.Count - rhs.Path.Count;
                 }
 
+                if (retv == 0)
+                {
+                    retv = Index - rhs.Index;
+                }
+
                 return retv;
             }
         }
 
-        public Solver(FlowBoard board)
+        private Solver(FlowBoard board)
         {
             game = board;
+        }
 
-            List<Node> nodes = InitializeNodes();
+        public static bool Solve(FlowBoard board)
+        {
+            var solver = new Solver(board);
 
-            bool foundPaths = Search(nodes);
+            List<Node> nodes = solver.InitializeNodes();
+
+            solver.SearchForcedPaths(nodes);
+            bool foundPaths = solver.Search(nodes);
+            if (!foundPaths)
+            {
+                board.Reset();
+            }
+
+            return foundPaths;
         }
 
         private bool Search(List<Node> nodes, Node previous = null)
@@ -73,8 +90,8 @@ namespace FlowSolver
             var pushBoard = PushBoard();
 
             var preferredNode = (from n in nodes
-                                where previous != null && previous.Color == n.Color && n.CompareTo(nodes[0]) == 0
-                                select n).FirstOrDefault();
+                                 where previous != null && previous.Color == n.Color && n.CompareTo(nodes[0]) == 0
+                                 select n).FirstOrDefault();
 
             var node = preferredNode ?? nodes[0];
             var nodePath = GetNodePath(node);
@@ -98,7 +115,7 @@ namespace FlowSolver
                     return false;
                 }
 
-                if (!CanVisitAllCells(nodes))
+                if (!CanVisitAllCells(nodesCopy))
                 {
                     return false;
                 }
@@ -296,6 +313,13 @@ namespace FlowSolver
             {
                 int pt1 = game.PointToIndex(element.Pt1);
                 int pt2 = game.PointToIndex(element.Pt2);
+                if (game.GetAdjacentCells(pt1, element.FlowColor).Count() > 1 &&
+                    game.GetAdjacentCells(pt2, element.FlowColor).Count() == 1)
+                {
+                    var temp = pt1;
+                    pt1 = pt2;
+                    pt2 = temp;
+                }
                 var node1 = new Node()
                 {
                     Color = element.FlowColor,
