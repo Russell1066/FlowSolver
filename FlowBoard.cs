@@ -12,6 +12,8 @@ namespace FlowSolver
 {
     public class FlowBoard : Board, INotifyPropertyChanged
     {
+        public BoardDefinition Board { get; private set; }
+
         public class Endpoints
         {
             public Color FlowColor { get; set; }
@@ -19,7 +21,7 @@ namespace FlowSolver
             public Point Pt2 { get; set; }
         };
 
-        class BoardDefinition
+        public class BoardDefinition
         {
             public int BoardSize { get; set; }
             public List<Endpoints> EndPointList { get; set; }
@@ -41,6 +43,27 @@ namespace FlowSolver
             }
         };
 
+        internal void Reset()
+        {
+            InitializeBoard(Board);
+        }
+
+        internal void Clear()
+        {
+            var board = new BoardDefinition()
+            {
+                BoardSize = Board.BoardSize,
+                EndPointList = new List<Endpoints>()
+            };
+
+            InitializeBoard(board);
+        }
+
+        internal void Load(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         public List<Endpoints> Puzzle = new List<Endpoints>();
         public List<Cell> Cells = new List<Cell>();
@@ -48,17 +71,17 @@ namespace FlowSolver
 
         public FlowBoard()
         {
-            InitializeBoard();
+            InitializeBoard(GetGameSetup3());
         }
 
-        private void InitializeBoard()
+        internal void InitializeBoard(BoardDefinition boardDefinition)
         {
-            var board = GetGameSetup3();
+            Board = boardDefinition;
 
-            Width = board.BoardSize;
+            Width = Board.BoardSize;
             Height = Width;
-            Puzzle = board.EndPointList;
-
+            Puzzle = Board.EndPointList;
+            Cells = new List<Cell>();
             for (int i = 0; i < BoardSize; ++i)
             {
                 Cells.Add(new Cell(i) { });
@@ -69,6 +92,14 @@ namespace FlowSolver
                 Cells[PointToIndex(endPoint.Pt1)].MakeEndpoint(endPoint.FlowColor);
                 Cells[PointToIndex(endPoint.Pt2)].MakeEndpoint(endPoint.FlowColor);
             }
+
+            OnPropertyChanged(nameof(Cells));
+        }
+
+        internal void AddEndpoints(Endpoints endpoints)
+        {
+            Board.EndPointList.Add(endpoints);
+            InitializeBoard(Board);
         }
 
         private BoardDefinition GetGameSetup0()

@@ -58,8 +58,16 @@
     <Compile Include="CellView.xaml.cs">
       <DependentUpon>CellView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EditorPanel.xaml.cs">
+      <DependentUpon>EditorPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FileUtilities.cs" />
     <Compile Include="Solver.cs" />
     <Page Include="CellView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditorPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

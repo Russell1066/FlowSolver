@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using static FlowSolver.Cell;
 
 namespace FlowSolver
@@ -29,9 +30,23 @@ namespace FlowSolver
             InitializeComponent();
         }
 
+        private void Board_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FlowBoard.Cells))
+            {
+                if (Board != null)
+                {
+                    Board.PropertyChanged -= Board_PropertyChanged;
+                }
+
+                Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(()=> Initialize(Board)));
+            }
+        }
+
         public void Initialize(FlowBoard board)
         {
             Board = board;
+            Board.PropertyChanged += Board_PropertyChanged;
             Field.Columns = Board.Width;
             Field.Rows = Board.Height;
             Field.Children.Clear();
@@ -41,6 +56,11 @@ namespace FlowSolver
                 var cell = Board.Cells[i];
                 var element = new CellView();
                 element.SetCell(cell);
+
+                element.MouseDown += (object sender, MouseButtonEventArgs e) =>
+                {
+                    cell.Press();
+                };
 
                 Field.Children.Add(element);
             }

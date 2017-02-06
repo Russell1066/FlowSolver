@@ -5,8 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FlowSolver"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Loaded="Window_Loaded">
-    <Grid Background="Black">
-        <local:Playfield x:Name="Gameboard"/>        
+        Title="MainWindow" Height="600" Width="720" >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="600*"/>
+            <ColumnDefinition Width="120*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Background="Black" Margin="0">
+            <local:Playfield x:Name="Gameboard"/>
+        </Grid>
+        <GridSplitter Grid.Column="1" Width="0"/>
+        <Button Content="Solve" Name="Solve" Grid.Column="1" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Top" Width="75" Click="Solve_Click"/>
+        <local:EditorPanel Grid.Column="1" x:Name="Editor" HorizontalAlignment="Center" Margin="0,80,0,0" Width="100" />
     </Grid>
 </Window>
