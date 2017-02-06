@@ -67,8 +67,26 @@ namespace FlowSolver
             }
         }
         public Cell Child { get; private set; }
-        public bool IsEndpoint { get; set; }
+        private bool _IsEndpoint;
+        public bool IsEndpoint
+        {
+            get { return _IsEndpoint; }
+            set
+            {
+                if (value != _IsEndpoint)
+                {
+                    _IsEndpoint = value;
+                    OnPropertyChanged(nameof(IsEndpoint));
+                };
+            }
+        }
         private Color _CellColor = Color.Empty;
+
+        internal void Press()
+        {
+            OnPropertyChanged("Pressed");
+        }
+
         public Color CellColor
         {
             get { return _CellColor; }
@@ -93,6 +111,12 @@ namespace FlowSolver
         {
             CellColor = color;
             IsEndpoint = true;
+        }
+
+        internal void ClearEndpoint()
+        {
+            CellColor = Color.Empty;
+            IsEndpoint = false;
         }
 
         public CellState GetCellState()

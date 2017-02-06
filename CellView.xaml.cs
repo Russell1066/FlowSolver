@@ -22,7 +22,7 @@ namespace FlowSolver
     /// </summary>
     public partial class CellView : UserControl, INotifyPropertyChanged
     {
-        private Cell BackingCell;
+        public Cell BackingCell { get; private set; }
         private Rectangle ConnectParent;
         private Rectangle ConnectChild;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -38,24 +38,38 @@ namespace FlowSolver
         public void SetCell(Cell cell)
         {
             BackingCell = cell;
+            UpdateEndpoint(cell);
+
+            cell.PropertyChanged += Cell_PropertyChanged;
+        }
+
+        private void UpdateEndpoint(Cell cell)
+        {
             Brush fillColor = GetBrushColor(cell.CellColor);
             if (cell.IsEndpoint)
             {
                 Square.Fill = Brushes.DarkGray;
                 Square.Margin = new Thickness(2);
                 Circle.Fill = fillColor;
+                Circle.Visibility = Visibility.Visible;
             }
             else
             {
                 Square.Fill = fillColor;
                 Square.Margin = new Thickness(2);
+                Circle.Visibility = Visibility.Hidden;
             }
-
-            cell.PropertyChanged += Cell_PropertyChanged;
         }
 
         private void Cell_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            var cell = sender as Cell;
+            if(e.PropertyName == nameof(Cell.IsEndpoint))
+            {
+                UpdateEndpoint(cell);
+                return;
+            }
+
             // These happen a lot - don't let them stack up
             // at the end, the fact that 100ms will have passed 
             if (DateTime.Now > nextUpdate)
@@ -133,7 +147,7 @@ namespace FlowSolver
             return GetBrushColor(BackingCell.CellColor);
         }
 
-        private static SolidColorBrush GetBrushColor(Cell.Color sourceColor)
+        public static SolidColorBrush GetBrushColor(Cell.Color sourceColor)
         {
             switch (sourceColor)
             {
