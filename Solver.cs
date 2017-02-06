@@ -54,20 +54,23 @@ namespace FlowSolver
             game = board;
         }
 
-        public static bool Solve(FlowBoard board)
+        public static Task<bool> Solve(FlowBoard board)
         {
-            var solver = new Solver(board);
+            return Task.Run(() =>
+                {
+                    var solver = new Solver(board);
 
-            List<Node> nodes = solver.InitializeNodes();
+                    List<Node> nodes = solver.InitializeNodes();
 
-            solver.SearchForcedPaths(nodes);
-            bool foundPaths = solver.Search(nodes);
-            if (!foundPaths)
-            {
-                board.Reset();
-            }
+                    solver.SearchForcedPaths(nodes);
+                    bool foundPaths = solver.Search(nodes);
+                    if (!foundPaths)
+                    {
+                        board.Reset();
+                    }
 
-            return foundPaths;
+                    return foundPaths;
+                });
         }
 
         private bool Search(List<Node> nodes, Node previous = null)

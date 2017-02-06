@@ -29,31 +29,45 @@ namespace FlowSolver
             InitializeComponent();
             Gameboard.Initialize(Game);
             Editor.Game = Game;
-            Editor.Viewer = Gameboard;
         }
 
         private void StartSolver()
         {
-            Trace.WriteLine($"");
             Stopwatch s = new Stopwatch();
             s.Start();
-            bool solved = Solver.Solve(Game);
-            s.Stop();
+            var task = Solver.Solve(Game);
+            task.ContinueWith(t =>
+            {
+                s.Stop();
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, new Action(() => SolveEnd(s)));
+            });
+        }
+
+        private void SolveEnd(Stopwatch s)
+        {
             Trace.WriteLine($"took : {s.Elapsed}");
-            Dispatcher.InvokeAsync(new Action(() => EnableButtons(true)));
+            UpdateButtons(false);
         }
 
         private void Solve_Click(object sender, RoutedEventArgs e)
         {
-            EnableButtons(false);
-            Task.Run(() => StartSolver());
+            UpdateButtons(true);
+            StartSolver();
         }
 
-        private void EnableButtons(bool isEnabled)
+        private void UpdateButtons(bool isBusy)
         {
-            Solve.IsEnabled = isEnabled;
-            Editor.Visibility = isEnabled ? Visibility.Visible : Visibility.Hidden;
+            var visible = isBusy ? Visibility.Hidden : Visibility.Visible;
+            var inVisible = !isBusy ? Visibility.Hidden : Visibility.Visible;
+
+            Solve.Visibility = visible;
+            Stop.Visibility = inVisible;
+            Editor.Visibility = visible;
         }
 
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            // nothign yet
+        }
     }
 }
