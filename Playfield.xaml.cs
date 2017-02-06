@@ -39,7 +39,7 @@ namespace FlowSolver
                     Board.PropertyChanged -= Board_PropertyChanged;
                 }
 
-                Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(()=> Initialize(Board)));
+                Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() => Initialize(Board)));
             }
         }
 
