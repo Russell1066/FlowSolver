@@ -85,7 +85,7 @@ namespace FlowSolver
 
             if (ActivePoint == 1)
             {
-                if((cell.Index == Game.PointToIndex(ActiveEndpoint.Pt2)))
+                if ((cell.Index == Game.PointToIndex(ActiveEndpoint.Pt2)))
                 {
                     ActiveEndpoint.Pt2 = ActiveEndpoint.Pt1;
                 }
