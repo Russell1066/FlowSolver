@@ -10,8 +10,9 @@ namespace FlowSolver
 {
     public class Solver
     {
-        FlowBoard game;
-        bool VisualDelay = false;
+        private FlowBoard Game;
+        private bool VisualDelay = false;
+        CancellationToken Token;
 
         class Path
         {
@@ -51,14 +52,15 @@ namespace FlowSolver
 
         private Solver(FlowBoard board)
         {
-            game = board;
+            Game = board;
+            Game.Reset();
         }
 
-        public static Task<bool> Solve(FlowBoard board)
+        public static Task<bool> Solve(FlowBoard board, CancellationToken ct)
         {
             return Task.Run(() =>
                 {
-                    var solver = new Solver(board);
+                    var solver = new Solver(board) { Token = ct };
 
                     List<Node> nodes = solver.InitializeNodes();
 
@@ -70,7 +72,7 @@ namespace FlowSolver
                     }
 
                     return foundPaths;
-                });
+                }, ct);
         }
 
         private bool Search(List<Node> nodes, Node previous = null)
@@ -78,6 +80,11 @@ namespace FlowSolver
             if (IsGameWon(nodes))
             {
                 return true;
+            }
+
+            if (Token.IsCancellationRequested)
+            {
+                Token.ThrowIfCancellationRequested();
             }
 
             if (nodes.Count == 0)
@@ -93,7 +100,9 @@ namespace FlowSolver
             var pushBoard = PushBoard();
 
             var preferredNode = (from n in nodes
-                                 where previous != null && previous.Color == n.Color && n.CompareTo(nodes[0]) == 0
+                                 where previous != null &&
+                                 previous.Color == n.Color &&
+                                 n.CompareTo(nodes[0]) == 0
                                  select n).FirstOrDefault();
 
             var node = preferredNode ?? nodes[0];
@@ -111,8 +120,7 @@ namespace FlowSolver
                                 where n.Index == node.Index
                                 select n).First();
 
-                nodeCopy.Moves.Clear();
-                nodeCopy.Moves.Add(move);
+                SetNodeToSingleMove(nodeCopy.Moves, move);
                 if (SearchForcedPaths(nodesCopy) == false)
                 {
                     return false;
@@ -132,9 +140,15 @@ namespace FlowSolver
             return IsGameWon(nodes);
         }
 
+        private static void SetNodeToSingleMove(List<int> moves, int move)
+        {
+            moves.Clear();
+            moves.Add(move);
+        }
+
         private bool CanVisitAllCells(List<Node> nodes)
         {
-            var cells = (from cell in game.Cells
+            var cells = (from cell in Game.Cells
                          where cell.CellColor == Cell.Color.Empty
                          select cell.Index).ToList();
 
@@ -153,8 +167,8 @@ namespace FlowSolver
                     var color = n.Color;
                     var path = BreadthFirstSearch.Search(cell, endPoint, (int index) =>
                     {
-                        var p = from c in game.GetAdjacentCells(index, color)
-                                where game.Cells[c].CellColor != n.Color || c == endPoint || n.Moves.Contains(c)
+                        var p = from c in Game.GetAdjacentCells(index, color)
+                                where Game.Cells[c].CellColor != n.Color || c == endPoint || n.Moves.Contains(c)
                                 select c;
                         return p.ToList();
                     });
@@ -208,8 +222,8 @@ namespace FlowSolver
 
             var path = BreadthFirstSearch.Search(pt1, pt2, (int index) =>
             {
-                var p = from c in game.GetAdjacentCells(index, color)
-                        where game.Cells[c].CellColor != color || c == pt2
+                var p = from c in Game.GetAdjacentCells(index, color)
+                        where Game.Cells[c].CellColor != color || c == pt2
                         select c;
                 return p.ToList();
             });
@@ -238,7 +252,7 @@ namespace FlowSolver
         {
             for (int i = 0; i < pushBoard.Count; ++i)
             {
-                game.Cells[i].SetState(pushBoard[i]);
+                Game.Cells[i].SetState(pushBoard[i]);
             }
 
             if (VisualDelay)
@@ -250,7 +264,7 @@ namespace FlowSolver
         private List<Cell.CellState> PushBoard()
         {
             var pushBoard = new List<Cell.CellState>();
-            foreach (var cell in game.Cells)
+            foreach (var cell in Game.Cells)
             {
                 pushBoard.Add(cell.GetCellState());
             }
@@ -261,7 +275,7 @@ namespace FlowSolver
         private bool IsGameWon(List<Node> nodes)
         {
             bool allNodesDone = nodes.Count == 0;
-            bool spaceFilled = (from cell in game.Cells
+            bool spaceFilled = (from cell in Game.Cells
                                 where cell.CellColor == Cell.Color.Empty
                                 select cell).Count() == 0;
 
@@ -275,7 +289,7 @@ namespace FlowSolver
                 var node = nodes[0];
                 var move = node.Moves[0];
 
-                game.Cells[move].Parent = game.Cells[node.Path.Last()];
+                Game.Cells[move].Parent = Game.Cells[node.Path.Last()];
                 node.Path.Add(move);
 
                 ClearMove(nodes, node, move);
@@ -302,7 +316,7 @@ namespace FlowSolver
 
         private void UpdateMoveList(Node node, int move)
         {
-            node.Moves = game.GetAdjacentCells(move, node.Color);
+            node.Moves = Game.GetAdjacentCells(move, node.Color);
             foreach (var n in node.Path)
             {
                 node.Moves.Remove(n);
@@ -312,12 +326,12 @@ namespace FlowSolver
         private List<Node> InitializeNodes()
         {
             List<Node> nodes = new List<Node>();
-            foreach (var element in game.Puzzle)
+            foreach (var element in Game.Puzzle)
             {
-                int pt1 = game.PointToIndex(element.Pt1);
-                int pt2 = game.PointToIndex(element.Pt2);
-                if (game.GetAdjacentCells(pt1, element.FlowColor).Count() > 1 &&
-                    game.GetAdjacentCells(pt2, element.FlowColor).Count() == 1)
+                int pt1 = Game.PointToIndex(element.Pt1);
+                int pt2 = Game.PointToIndex(element.Pt2);
+                if (Game.GetAdjacentCells(pt1, element.FlowColor).Count() > 1 &&
+                    Game.GetAdjacentCells(pt2, element.FlowColor).Count() == 1)
                 {
                     var temp = pt1;
                     pt1 = pt2;
@@ -329,7 +343,7 @@ namespace FlowSolver
                     Index = pt1,
                     DestinationIndex = pt2
                 };
-                node1.Moves = game.GetAdjacentCells(pt1, element.FlowColor);
+                node1.Moves = Game.GetAdjacentCells(pt1, element.FlowColor);
                 node1.Path.Add(pt1);
                 nodes.Add(node1);
             }

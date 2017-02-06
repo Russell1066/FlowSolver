@@ -23,6 +23,7 @@ namespace FlowSolver
     public partial class MainWindow : Window
     {
         FlowBoard Game = new FlowBoard();
+        CancellationTokenSource TokenSource;
 
         public MainWindow()
         {
@@ -31,20 +32,20 @@ namespace FlowSolver
             Editor.Game = Game;
         }
 
-        private void StartSolver()
+        private async void StartSolver()
         {
             Stopwatch s = new Stopwatch();
             s.Start();
-            var task = Solver.Solve(Game);
-            task.ContinueWith(t =>
+            try
             {
-                s.Stop();
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ApplicationIdle, new Action(() => SolveEnd(s)));
-            });
-        }
-
-        private void SolveEnd(Stopwatch s)
-        {
+                TokenSource = new CancellationTokenSource();
+                var task = await Solver.Solve(Game, TokenSource.Token);
+            }
+            catch (OperationCanceledException cancelled)
+            {
+                Trace.WriteLine(cancelled.ToString());
+            }
+            s.Stop();
             Trace.WriteLine($"took : {s.Elapsed}");
             UpdateButtons(false);
         }
@@ -67,7 +68,7 @@ namespace FlowSolver
 
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
-            // nothign yet
+            TokenSource.Cancel();
         }
     }
 }
