@@ -39,6 +39,7 @@ namespace FlowSolver
         {
             BackingCell = cell;
             UpdateEndpoint(cell);
+            UpdateCell(cell.Parent, cell.Child);
 
             cell.PropertyChanged += Cell_PropertyChanged;
         }
@@ -46,17 +47,15 @@ namespace FlowSolver
         private void UpdateEndpoint(Cell cell)
         {
             Brush fillColor = GetBrushColor(cell.CellColor);
+            Square.Fill = Brushes.DarkGray;
+            Square.Margin = new Thickness(2);
             if (cell.IsEndpoint)
             {
-                Square.Fill = Brushes.DarkGray;
-                Square.Margin = new Thickness(2);
                 Circle.Fill = fillColor;
                 Circle.Visibility = Visibility.Visible;
             }
             else
             {
-                Square.Fill = fillColor;
-                Square.Margin = new Thickness(2);
                 Circle.Visibility = Visibility.Hidden;
             }
         }
@@ -64,7 +63,7 @@ namespace FlowSolver
         private void Cell_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var cell = sender as Cell;
-            if(e.PropertyName == nameof(Cell.IsEndpoint))
+            if (e.PropertyName == nameof(Cell.IsEndpoint))
             {
                 UpdateEndpoint(cell);
                 return;
@@ -74,8 +73,8 @@ namespace FlowSolver
             // at the end, the fact that 100ms will have passed 
             if (DateTime.Now > nextUpdate)
             {
-                nextUpdate = DateTime.Now.AddMilliseconds(PREUPDATEDELAY - PREUPDATEOFFSET);
                 var delay = Task.Delay(PREUPDATEDELAY);
+                nextUpdate = DateTime.Now.AddMilliseconds(PREUPDATEDELAY - PREUPDATEOFFSET);
                 var updateCell = new Action(() => UpdateCell(BackingCell.Parent, BackingCell.Child));
                 var updateCellTask = new Action<Task>((t) => Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, updateCell));
                 delay.ContinueWith(updateCellTask);
