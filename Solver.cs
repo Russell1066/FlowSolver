@@ -11,7 +11,6 @@ namespace FlowSolver
     public class Solver
     {
         private FlowBoard Game;
-        private bool VisualDelay = false;
         CancellationToken Token;
 
         class Path
@@ -97,18 +96,20 @@ namespace FlowSolver
                 return false;
             }
 
+            if (!NoTrappedCells(nodes))
+            {
+                return false;
+            }
+
+            if (!CanVisitAllCells(nodes))
+            {
+                return false;
+            }
+
             var pushBoard = PushBoard();
 
-            var preferredNode = (from n in nodes
-                                 where previous != null &&
-                                 previous.Color == n.Color &&
-                                 n.CompareTo(nodes[0]) == 0
-                                 select n).FirstOrDefault();
-
-            var node = preferredNode ?? nodes[0];
-            var nodePath = GetNodePath(node);
-            nodePath.Reverse();
-            List<int> moves = GetMovesShortestFirst(node, nodePath);
+            Node node = GetStartingNode(nodes, previous);
+            List<int> moves = GetMoveList(node);
 
             foreach (var move in moves)
             {
@@ -116,28 +117,79 @@ namespace FlowSolver
                 PopBoard(pushBoard);
 
                 var nodesCopy = NodeCopy(nodes);
-                var nodeCopy = (from n in nodesCopy
-                                where n.Index == node.Index
-                                select n).First();
+                Node nodeCopy = GetCopiedNode(nodesCopy, node);
 
                 SetNodeToSingleMove(nodeCopy.Moves, move);
+
                 if (SearchForcedPaths(nodesCopy) == false)
                 {
-                    return false;
+                    continue;
                 }
 
-                if (!CanVisitAllCells(nodesCopy))
-                {
-                    return false;
-                }
-
-                if (Search(nodesCopy, node) == true)
+                if (Search(nodesCopy, nodeCopy) == true)
                 {
                     return true;
                 }
             }
 
             return IsGameWon(nodes);
+        }
+
+        private bool NoTrappedCells(List<Node> nodes)
+        {
+            var empty = from cell in Game.Cells
+                        where cell.CellColor == Cell.Color.Empty
+                        select cell;
+
+            var pathEnds = from node in nodes
+                           select node.Path.Last();
+
+            var endpoints = from node in nodes
+                            select node.DestinationIndex;
+
+            var exitPoints = endpoints.ToList();
+            exitPoints.AddRange(pathEnds);
+
+            var trapped = from s in empty
+                          let adj = Game.GetAllAdjacentCells(s.Index)
+                          let emptyNeighbor = from a in adj
+                                              where a.CellColor == Cell.Color.Empty
+                                              select a
+                          let validEgress = from a in adj
+                                            where exitPoints.Contains(a.Index)
+                                            select a
+                          let totalOutput = emptyNeighbor.Count() + validEgress.Count()
+                          where totalOutput <= 1
+                          select new { s, adj, validEgress, totalOutput };
+
+            return trapped.Count() == 0;
+        }
+
+        private static Node GetCopiedNode(List<Node> nodesCopy, Node node)
+        {
+            return (from n in nodesCopy
+                    where n.Index == node.Index
+                    select n).First();
+        }
+
+        private List<int> GetMoveList(Node node)
+        {
+            var nodePath = GetNodePath(node);
+            nodePath.Reverse();
+            List<int> moves = GetMovesShortestFirst(node, nodePath);
+            return moves;
+        }
+
+        private static Node GetStartingNode(List<Node> nodes, Node previous)
+        {
+            var preferredNode = (from n in nodes
+                                 where previous != null &&
+                                 previous.Color == n.Color &&
+                                 n.CompareTo(nodes[0]) == 0
+                                 select n).FirstOrDefault();
+
+            var node = preferredNode ?? nodes[0];
+            return node;
         }
 
         private static void SetNodeToSingleMove(List<int> moves, int move)
@@ -167,7 +219,7 @@ namespace FlowSolver
                     var color = n.Color;
                     var path = BreadthFirstSearch.Search(cell, endPoint, (int index) =>
                     {
-                        var p = from c in Game.GetAdjacentCells(index, color)
+                        var p = from c in Game.GetAdjacentCellIndicies(index, color)
                                 where Game.Cells[c].CellColor != n.Color || c == endPoint || n.Moves.Contains(c)
                                 select c;
                         return p.ToList();
@@ -222,7 +274,7 @@ namespace FlowSolver
 
             var path = BreadthFirstSearch.Search(pt1, pt2, (int index) =>
             {
-                var p = from c in Game.GetAdjacentCells(index, color)
+                var p = from c in Game.GetAdjacentCellIndicies(index, color)
                         where Game.Cells[c].CellColor != color || c == pt2
                         select c;
                 return p.ToList();
@@ -253,11 +305,6 @@ namespace FlowSolver
             for (int i = 0; i < pushBoard.Count; ++i)
             {
                 Game.Cells[i].SetState(pushBoard[i]);
-            }
-
-            if (VisualDelay)
-            {
-                Thread.Sleep(20);
             }
         }
 
@@ -316,7 +363,7 @@ namespace FlowSolver
 
         private void UpdateMoveList(Node node, int move)
         {
-            node.Moves = Game.GetAdjacentCells(move, node.Color);
+            node.Moves = Game.GetAdjacentCellIndicies(move, node.Color);
             foreach (var n in node.Path)
             {
                 node.Moves.Remove(n);
@@ -330,8 +377,8 @@ namespace FlowSolver
             {
                 int pt1 = Game.PointToIndex(element.Pt1);
                 int pt2 = Game.PointToIndex(element.Pt2);
-                if (Game.GetAdjacentCells(pt1, element.FlowColor).Count() > 1 &&
-                    Game.GetAdjacentCells(pt2, element.FlowColor).Count() == 1)
+                if (Game.GetAdjacentCellIndicies(pt1, element.FlowColor).Count() > 1 &&
+                    Game.GetAdjacentCellIndicies(pt2, element.FlowColor).Count() == 1)
                 {
                     var temp = pt1;
                     pt1 = pt2;
@@ -343,7 +390,7 @@ namespace FlowSolver
                     Index = pt1,
                     DestinationIndex = pt2
                 };
-                node1.Moves = Game.GetAdjacentCells(pt1, element.FlowColor);
+                node1.Moves = Game.GetAdjacentCellIndicies(pt1, element.FlowColor);
                 node1.Path.Add(pt1);
                 nodes.Add(node1);
             }
