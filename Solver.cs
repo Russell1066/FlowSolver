@@ -120,11 +120,9 @@ namespace FlowSolver
                 Node nodeCopy = GetCopiedNode(nodesCopy, node);
 
                 SetNodeToSingleMove(nodeCopy.Moves, move);
-
-                if (SearchForcedPaths(nodesCopy) == false)
-                {
-                    continue;
-                }
+                
+                // After the move is set, update all of the paths forced by this
+                SearchForcedPaths(nodesCopy);
 
                 if (Search(nodesCopy, nodeCopy) == true)
                 {
@@ -329,8 +327,10 @@ namespace FlowSolver
             return allNodesDone && spaceFilled;
         }
 
-        private bool SearchForcedPaths(List<Node> nodes)
+        private void SearchForcedPaths(List<Node> nodes)
         {
+            nodes.Sort();
+
             while (nodes.Count > 0 && nodes[0].Moves.Count() == 1)
             {
                 var node = nodes[0];
@@ -349,8 +349,6 @@ namespace FlowSolver
                 UpdateMoveList(node, move);
                 nodes.Sort();
             }
-
-            return true;
         }
 
         private static void ClearMove(List<Node> nodes, Node node, int move)
