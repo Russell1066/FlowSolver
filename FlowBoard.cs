@@ -71,7 +71,7 @@ namespace FlowSolver
 
         public FlowBoard()
         {
-            InitializeBoard(GetGameSetup3());
+            InitializeBoard(GetGameSetup());
         }
 
         internal void InitializeBoard(BoardDefinition boardDefinition)
@@ -102,49 +102,7 @@ namespace FlowSolver
             InitializeBoard(Board);
         }
 
-        private BoardDefinition GetGameSetup0()
-        {
-            BoardDefinition bd = new BoardDefinition()
-            {
-                BoardSize = 5,
-                EndPointList = new List<Endpoints>
-                {
-                    new Endpoints() { FlowColor = Color.Blue, Pt1 = new Point(0,0), Pt2 = new Point(1,1) },
-                    new Endpoints() { FlowColor = Color.Green, Pt1 = new Point(1,0), Pt2 = new Point(2,2)},
-                    new Endpoints() { FlowColor = Color.Yellow, Pt1 = new Point(3,0), Pt2 = new Point(1,2)},
-                    new Endpoints() { FlowColor = Color.Red, Pt1 = new Point(3,1), Pt2 = new Point(1,3)},
-                }
-            };
-
-            return bd;
-        }
-
-        private BoardDefinition GetGameSetup1()
-        {
-            string json = @"{""BoardSize"":8,""EndPointList"":[{""FlowColor"":2,""Pt1"":{""X"":0,""Y"":0},""Pt2"":{""X"":4,""Y"":7}},{""FlowColor"":5,""Pt1"":{""X"":1,""Y"":0},""Pt2"":{""X"":5,""Y"":1}},{""FlowColor"":6,""Pt1"":{""X"":1,""Y"":2},""Pt2"":{""X"":6,""Y"":6}},{""FlowColor"":3,""Pt1"":{""X"":2,""Y"":0},""Pt2"":{""X"":6,""Y"":0}},{""FlowColor"":4,""Pt1"":{""X"":5,""Y"":2},""Pt2"":{""X"":2,""Y"":4}},{""FlowColor"":7,""Pt1"":{""X"":5,""Y"":4},""Pt2"":{""X"":4,""Y"":6}},{""FlowColor"":1,""Pt1"":{""X"":7,""Y"":0},""Pt2"":{""X"":6,""Y"":1}}]}";
-
-            return JsonConvert.DeserializeObject<BoardDefinition>(json);
-        }
-
-        private BoardDefinition GetGameSetup2()
-        {
-            BoardDefinition bd = new BoardDefinition()
-            {
-                BoardSize = 7,
-                EndPointList = new List<Endpoints>
-                {
-                    new Endpoints() { FlowColor = Color.Orange, Pt1 = new Point(0,0), Pt2 = new Point(5,1) },
-                    new Endpoints() { FlowColor = Color.Blue, Pt1 = new Point(5,0), Pt2 = new Point(2,2)},
-                    new Endpoints() { FlowColor = Color.Red, Pt1 = new Point(0,1), Pt2 = new Point(1,5)},
-                    new Endpoints() { FlowColor = Color.Green, Pt1 = new Point(5,3), Pt2 = new Point(3,6)},
-                    new Endpoints() { FlowColor = Color.Yellow, Pt1 = new Point(6,3), Pt2 = new Point(4,6)},
-                }
-            };
-
-            return bd;
-        }
-
-        private BoardDefinition GetGameSetup3()
+        private BoardDefinition GetGameSetup()
         {
             BoardDefinition bd = new BoardDefinition()
             {
@@ -163,54 +121,18 @@ namespace FlowSolver
             return bd;
         }
 
-        private BoardDefinition GetGameSetup4()
+        public IEnumerable<Cell> GetAllAdjacentCells(int cell)
         {
-            BoardDefinition bd = new BoardDefinition()
-            {
-                BoardSize = 8,
-                EndPointList = new List<Endpoints>
-                {
-                    new Endpoints() { FlowColor = Color.Magenta, Pt1 = new Point(0,0), Pt2 = new Point(4,2)},
-                    new Endpoints() { FlowColor = Color.Green, Pt1 = new Point(2,0), Pt2 = new Point(7,0)},
-                    new Endpoints() { FlowColor = Color.Orange, Pt1 = new Point(0,1), Pt2 = new Point(7,3)},
-                    new Endpoints() { FlowColor = Color.Yellow, Pt1 = new Point(6,1), Pt2 = new Point(5,5)},
-                    new Endpoints() { FlowColor = Color.Red, Pt1 = new Point(7,1), Pt2 = new Point(4,3)},
-                    new Endpoints() { FlowColor = Color.Cyan, Pt1 = new Point(3,2), Pt2 = new Point(3,5)},
-                    new Endpoints() { FlowColor = Color.Blue, Pt1 = new Point(1,2), Pt2 = new Point(1,6)},
-                    new Endpoints() { FlowColor = Color.Brown, Pt1 = new Point(2,2), Pt2 = new Point(3,6)},
-                }
-            };
+            var p = IndexToPoint(cell);
+            var cells = from adj in Adjacent
+                        let test = p + adj
+                        where IsInBounds(test)
+                        select Cells[PointToIndex(test)];
 
-            return bd;
+            return cells;
         }
 
-        private BoardDefinition GetGameSetup5()
-        {
-            BoardDefinition bd = new BoardDefinition()
-            {
-                BoardSize = 8,
-                EndPointList = new List<Endpoints>
-                {
-                    new Endpoints() { FlowColor = Color.Red, Pt1 = new Point(2,0), Pt2 = new Point(3,3)},
-                    new Endpoints() { FlowColor = Color.Blue, Pt1 = new Point(3,0), Pt2 = new Point(7,0)},
-                    new Endpoints() { FlowColor = Color.Magenta, Pt1 = new Point(2,1), Pt2 = new Point(1,4)},
-                    new Endpoints() { FlowColor = Color.Green, Pt1 = new Point(7,1), Pt2 = new Point(4,5)},
-                    new Endpoints() { FlowColor = Color.Brown, Pt1 = new Point(4,2), Pt2 = new Point(6,7)},
-                    new Endpoints() { FlowColor = Color.Cyan, Pt1 = new Point(7,2), Pt2 = new Point(7,7)},
-                    new Endpoints() { FlowColor = Color.Orange, Pt1 = new Point(3,5), Pt2 = new Point(1,6)},
-                    new Endpoints() { FlowColor = Color.Yellow, Pt1 = new Point(2,6), Pt2 = new Point(4,6)},
-                }
-            };
-
-            return bd;
-        }
-
-        public List<int> GetAdjacentCells(Point cell, Color allowColor = Color.Empty)
-        {
-            return GetAdjacentCells(PointToIndex(cell), allowColor);
-        }
-
-        public List<int> GetAdjacentCells(int cell, Color allowColor = Color.Empty)
+        public List<int> GetAdjacentCellIndicies(int cell, Color allowColor = Color.Empty)
         {
             List<int> retv = new List<int>();
             Point p = IndexToPoint(cell);
