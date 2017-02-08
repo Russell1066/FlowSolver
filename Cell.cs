@@ -134,5 +134,11 @@ namespace FlowSolver
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
+        public override string ToString()
+        {
+            string endpoint = IsEndpoint ? "Endpoint" : string.Empty;
+            return string.Format($"{Index,3} {CellColor} {endpoint}");
+        }
     }
 }

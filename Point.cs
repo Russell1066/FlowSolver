@@ -23,5 +23,10 @@ namespace FlowSolver
         {
             return new Point(lhs.X + rhs.X, lhs.Y + rhs.Y);
         }
+
+        public override string ToString()
+        {
+            return string.Format($"X {X}, Y {Y}");
+        }
     };
 }
