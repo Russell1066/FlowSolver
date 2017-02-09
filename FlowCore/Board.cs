@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlowSolver
+namespace SolverCore
 {
     public class Board
     {

@@ -6,12 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlowSolver
+namespace SolverCore
 {
     public class Cell : INotifyPropertyChanged
     {
         public enum Color
         {
+            DontUse = -1,
             Empty, // Used to denote an empty cell
             Red,
             Green,
@@ -21,7 +22,14 @@ namespace FlowSolver
             Orange,
             Magenta,
             Brown,
-            DontUse
+            DarkBlue,
+            Gold,
+            DarkCyan,
+            Silver,
+            White,
+            DarkGreen,
+            DarkPurple,
+            LimeGreen,
         };
 
         public class CellState
@@ -82,7 +90,7 @@ namespace FlowSolver
         }
         private Color _CellColor = Color.Empty;
 
-        internal void Press()
+        public void Press()
         {
             OnPropertyChanged("Pressed");
         }
@@ -113,7 +121,7 @@ namespace FlowSolver
             IsEndpoint = true;
         }
 
-        internal void ClearEndpoint()
+        public void ClearEndpoint()
         {
             CellColor = Color.Empty;
             IsEndpoint = false;

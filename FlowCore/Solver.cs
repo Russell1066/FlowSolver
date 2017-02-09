@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FlowSolver
+namespace SolverCore
 {
     public class Solver
     {
@@ -20,11 +20,24 @@ namespace FlowSolver
 
         class Node : IComparable
         {
+            public FlowBoard Game;
             public Cell.Color Color;
             public int Index;
             public int DestinationIndex;
             public List<int> Path = new List<int>();
             public List<int> Moves = new List<int>();
+
+            public Node() { }
+
+            public Node(Node rhs)
+            {
+                Game = rhs.Game;
+                Color = rhs.Color;
+                Index = rhs.Index;
+                DestinationIndex = rhs.DestinationIndex;
+                Path = rhs.Path.ToList();
+                Moves = rhs.Moves.ToList();
+            }
 
             public int CompareTo(object obj)
             {
@@ -58,20 +71,20 @@ namespace FlowSolver
         public static Task<bool> Solve(FlowBoard board, CancellationToken ct)
         {
             return Task.Run(() =>
+            {
+                var solver = new Solver(board) { Token = ct };
+
+                List<Node> nodes = solver.InitializeNodes();
+
+                solver.SearchForcedPaths(nodes);
+                bool foundPaths = solver.Search(nodes);
+                if (!foundPaths)
                 {
-                    var solver = new Solver(board) { Token = ct };
+                    board.Reset();
+                }
 
-                    List<Node> nodes = solver.InitializeNodes();
-
-                    solver.SearchForcedPaths(nodes);
-                    bool foundPaths = solver.Search(nodes);
-                    if (!foundPaths)
-                    {
-                        board.Reset();
-                    }
-
-                    return foundPaths;
-                }, ct);
+                return foundPaths;
+            }, ct);
         }
 
         private bool Search(List<Node> nodes, Node previous = null)
@@ -116,11 +129,11 @@ namespace FlowSolver
                 // restore the board
                 PopBoard(pushBoard);
 
-                var nodesCopy = NodeCopy(nodes);
+                var nodesCopy = CopyNodes(nodes);
                 Node nodeCopy = GetCopiedNode(nodesCopy, node);
 
                 SetNodeToSingleMove(nodeCopy.Moves, move);
-                
+
                 // After the move is set, update all of the paths forced by this
                 SearchForcedPaths(nodesCopy);
 
@@ -280,22 +293,10 @@ namespace FlowSolver
             return path;
         }
 
-        private static List<Node> NodeCopy(List<Node> nodes)
+        private static List<Node> CopyNodes(List<Node> nodes)
         {
-            List<Node> retv = new List<Node>();
-            foreach (var node in nodes)
-            {
-                retv.Add(new Node()
-                {
-                    Color = node.Color,
-                    DestinationIndex = node.DestinationIndex,
-                    Index = node.Index,
-                    Moves = node.Moves.ToList(),
-                    Path = node.Path.ToList()
-                });
-            }
-
-            return retv;
+            return (from node in nodes
+                    select new Node(node)).ToList();
         }
 
         private void PopBoard(List<Cell.CellState> pushBoard)
@@ -384,12 +385,13 @@ namespace FlowSolver
                 }
                 var node1 = new Node()
                 {
+                    Game = this.Game,
                     Color = element.FlowColor,
                     Index = pt1,
-                    DestinationIndex = pt2
+                    DestinationIndex = pt2,
+                    Moves = Game.GetAdjacentCellIndicies(pt1, element.FlowColor),
+                    Path = new List<int>() { pt1 },
                 };
-                node1.Moves = Game.GetAdjacentCellIndicies(pt1, element.FlowColor);
-                node1.Path.Add(pt1);
                 nodes.Add(node1);
             }
 

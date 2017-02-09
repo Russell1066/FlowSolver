@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using SolverCore;
 
 namespace FlowSolver
 {
@@ -174,8 +175,32 @@ namespace FlowSolver
                 case Cell.Color.Brown:
                     return Brushes.Brown;
 
-                case Cell.Color.DontUse:
+                case Cell.Color.DarkBlue:
+                    return Brushes.DarkBlue;
+
+                case Cell.Color.Gold:
+                    return Brushes.Gold;
+
+                case Cell.Color.DarkCyan:
+                    return Brushes.DarkCyan;
+
+                case Cell.Color.Silver:
+                    return Brushes.Silver;
+
+                case Cell.Color.White:
                     return Brushes.White;
+
+                case Cell.Color.DarkGreen:
+                    return Brushes.DarkGreen;
+
+                case Cell.Color.DarkPurple:
+                    return Brushes.DarkMagenta;
+
+                case Cell.Color.LimeGreen:
+                    return Brushes.LimeGreen;
+
+                case Cell.Color.DontUse:
+                    return Brushes.Black;
 
                 default:
                     return Brushes.DarkGray;

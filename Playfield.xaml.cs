@@ -14,7 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using static FlowSolver.Cell;
+using static SolverCore.Cell;
+using SolverCore;
 
 namespace FlowSolver
 {

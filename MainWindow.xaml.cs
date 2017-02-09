@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using SolverCore;
 
 namespace FlowSolver
 {
@@ -39,6 +40,7 @@ namespace FlowSolver
             try
             {
                 TokenSource = new CancellationTokenSource();
+                TokenSource.CancelAfter(2 * 60 * 1000);
                 var task = await Solver.Solve(Game, TokenSource.Token);
             }
             catch (OperationCanceledException cancelled)
