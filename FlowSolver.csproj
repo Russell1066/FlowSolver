@@ -122,5 +122,11 @@
       <Version>9.0.1</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="FlowCore\FlowCore.csproj">
+      <Project>{8351cd25-1220-42f5-ae63-cad8e7ae41fc}</Project>
+      <Name>FlowCore</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
