@@ -13,7 +13,7 @@
         <Rectangle Name="ConnectRight" VerticalAlignment="Center" Height="20" Panel.ZIndex="1"  Margin="{Binding RightThickness, Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:CellView}}}"/>
         <Grid Margin="2" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:CellView}}}" >
             <Rectangle Name="Square"/>
-            <Ellipse Name="Circle"></Ellipse>
+            <Ellipse Name="Circle" Margin="4"></Ellipse>
         </Grid>
     </Grid>
 </UserControl>
