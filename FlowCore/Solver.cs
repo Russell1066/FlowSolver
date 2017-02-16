@@ -11,16 +11,11 @@ namespace SolverCore
     public class Solver
     {
         private FlowBoard Game;
-        CancellationToken Token;
-
-        class Path
-        {
-            public List<int> parents = new List<int>();
-        }
+        private CancellationToken Token;
+        private int Index { get; set; }
 
         class Node : IComparable
         {
-            public FlowBoard Game;
             public Cell.Color Color;
             public int Index;
             public int DestinationIndex;
@@ -31,7 +26,6 @@ namespace SolverCore
 
             public Node(Node rhs)
             {
-                Game = rhs.Game;
                 Color = rhs.Color;
                 Index = rhs.Index;
                 DestinationIndex = rhs.DestinationIndex;
@@ -68,23 +62,31 @@ namespace SolverCore
             Game.Reset();
         }
 
+        private Solver(Solver solver)
+        {
+            Token = solver.Token;
+            Game = new FlowBoard(solver.Game);
+        }
+
         public static Task<bool> Solve(FlowBoard board, CancellationToken ct)
         {
-            return Task.Run(() =>
+            return Task.Run(() => SolveBoard(board, ct));
+        }
+
+        private static bool SolveBoard(FlowBoard board, CancellationToken ct)
+        {
+            var solver = new Solver(board) { Token = ct };
+
+            List<Node> nodes = solver.InitializeNodes();
+
+            solver.SearchForcedPaths(nodes);
+            bool foundPaths = solver.Search(nodes);
+            if (!foundPaths)
             {
-                var solver = new Solver(board) { Token = ct };
+                board.Reset();
+            }
 
-                List<Node> nodes = solver.InitializeNodes();
-
-                solver.SearchForcedPaths(nodes);
-                bool foundPaths = solver.Search(nodes);
-                if (!foundPaths)
-                {
-                    board.Reset();
-                }
-
-                return foundPaths;
-            }, ct);
+            return foundPaths;
         }
 
         private bool Search(List<Node> nodes, Node previous = null)
@@ -94,27 +96,7 @@ namespace SolverCore
                 return true;
             }
 
-            if (Token.IsCancellationRequested)
-            {
-                Token.ThrowIfCancellationRequested();
-            }
-
-            if (nodes.Count == 0)
-            {
-                return false;
-            }
-
-            if (!PathsExist(nodes))
-            {
-                return false;
-            }
-
-            if (!NoTrappedCells(nodes))
-            {
-                return false;
-            }
-
-            if (!CanVisitAllCells(nodes))
+            if (!TestPreconditions(nodes))
             {
                 return false;
             }
@@ -144,6 +126,36 @@ namespace SolverCore
             }
 
             return IsGameWon(nodes);
+        }
+
+        private bool TestPreconditions(List<Node> nodes)
+        {
+            if (Token.IsCancellationRequested)
+            {
+                Token.ThrowIfCancellationRequested();
+            }
+
+            if (nodes.Count == 0)
+            {
+                return false;
+            }
+
+            if (!PathsExist(nodes))
+            {
+                return false;
+            }
+
+            if (!NoTrappedCells(nodes))
+            {
+                return false;
+            }
+
+            if (!CanVisitAllCells(nodes))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private bool NoTrappedCells(List<Node> nodes)
@@ -191,7 +203,7 @@ namespace SolverCore
             return moves;
         }
 
-        private static Node GetStartingNode(List<Node> nodes, Node previous)
+        private Node GetStartingNode(List<Node> nodes, Node previous)
         {
             var preferredNode = (from n in nodes
                                  where previous != null &&
@@ -376,27 +388,31 @@ namespace SolverCore
             {
                 int pt1 = Game.PointToIndex(element.Pt1);
                 int pt2 = Game.PointToIndex(element.Pt2);
-                if (Game.GetAdjacentCellIndicies(pt1, element.FlowColor).Count() > 1 &&
-                    Game.GetAdjacentCellIndicies(pt2, element.FlowColor).Count() == 1)
+                if (Game.GetAdjacentCellIndicies(pt1, element.FlowColor).Count() >
+                    Game.GetAdjacentCellIndicies(pt2, element.FlowColor).Count())
                 {
                     var temp = pt1;
                     pt1 = pt2;
                     pt2 = temp;
                 }
-                var node1 = new Node()
-                {
-                    Game = this.Game,
-                    Color = element.FlowColor,
-                    Index = pt1,
-                    DestinationIndex = pt2,
-                    Moves = Game.GetAdjacentCellIndicies(pt1, element.FlowColor),
-                    Path = new List<int>() { pt1 },
-                };
-                nodes.Add(node1);
+
+                nodes.Add(CreateNode(element, pt1, pt2));
             }
 
             nodes.Sort();
             return nodes;
+        }
+
+        private Node CreateNode(FlowBoard.Endpoints element, int pt1, int pt2)
+        {
+            return new Node()
+            {
+                Color = element.FlowColor,
+                Index = pt1,
+                DestinationIndex = pt2,
+                Moves = Game.GetAdjacentCellIndicies(pt1, element.FlowColor),
+                Path = new List<int>() { pt1 },
+            };
         }
     }
 }
