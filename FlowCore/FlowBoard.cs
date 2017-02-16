@@ -12,7 +12,11 @@ namespace SolverCore
 {
     public class FlowBoard : Board, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
         public BoardDefinition Board { get; private set; }
+        public List<Endpoints> Puzzle { get; private set; } = new List<Endpoints>();
+        public List<Cell> Cells { get; private set; } = new List<Cell>();
+        private static List<Point> Adjacent = new List<Point>() { new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) };
 
         public class Endpoints
         {
@@ -20,6 +24,10 @@ namespace SolverCore
             public Point Pt1 { get; set; }
             public Point Pt2 { get; set; }
         };
+
+        public FlowBoard()
+        {
+        }
 
         public void Reset()
         {
@@ -35,15 +43,6 @@ namespace SolverCore
             };
 
             InitializeBoard(board);
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        public List<Endpoints> Puzzle = new List<Endpoints>();
-        public List<Cell> Cells = new List<Cell>();
-        static List<Point> Adjacent = new List<Point>() { new Point(-1, 0), new Point(1, 0), new Point(0, -1), new Point(0, 1) };
-
-        public FlowBoard()
-        {
         }
 
         public void InitializeBoard(BoardDefinition boardDefinition)
@@ -65,7 +64,7 @@ namespace SolverCore
                 Cells[PointToIndex(endPoint.Pt2)].MakeEndpoint(endPoint.FlowColor);
             }
 
-            OnPropertyChanged(nameof(Cells));
+            OnPropertyChanged("Initialized");
         }
 
         public void AddEndpoints(Endpoints endpoints)
@@ -120,7 +119,7 @@ namespace SolverCore
             public List<Endpoints> EndPointList { get; set; }
             private const int MINENDPOINTS = 4;
             private const int MINBOARDSIZE = 5;
-            private const int MAXBOARDSIZE = 12;
+            private const int MAXBOARDSIZE = 14;
 
             public bool ValidBoardSize()
             {
@@ -189,7 +188,7 @@ namespace SolverCore
 
                 if (!ValidEndPointList())
                 {
-                    sb.AppendLine($"Invalid number of end points {EndPointList.Count} - {MINENDPOINTS} - {BoardSize} supported only for this board size");
+                    sb.AppendLine($"Invalid number of end points {EndPointList.Count} - {MINENDPOINTS}");
                 }
 
                 if (!AllPointsUnique())
