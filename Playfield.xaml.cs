@@ -33,7 +33,7 @@ namespace FlowSolver
 
         private void Board_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(FlowBoard.Cells))
+            if (e.PropertyName == "Initialized")
             {
                 if (Board != null)
                 {
