@@ -40,8 +40,18 @@ namespace FlowSolver
             try
             {
                 TokenSource = new CancellationTokenSource();
-                TokenSource.CancelAfter(2 * 60 * 1000);
+                //TokenSource.CancelAfter(2 * 60 * 1000);
+                var timer = Task.Run(async () =>
+                {
+                    while (!TokenSource.Token.IsCancellationRequested)
+                    {
+                        await Task.Delay(1000, TokenSource.Token);
+                        string clockString = GetElapsedTime(s);
+                        var ignore = Dispatcher.BeginInvoke(new Action(() => { Clock.Text = clockString; }));
+                    }
+                });
                 var task = await Solver.Solve(Game, TokenSource.Token);
+                TokenSource.Cancel();
             }
             catch (OperationCanceledException cancelled)
             {
@@ -49,7 +59,14 @@ namespace FlowSolver
             }
             s.Stop();
             Trace.WriteLine($"took : {s.Elapsed}");
+            Clock.Text = GetElapsedTime(s);
             UpdateButtons(false);
+        }
+
+        private static string GetElapsedTime(Stopwatch s)
+        {
+            var elapsed = new TimeSpan(0, 0, (int)s.Elapsed.TotalSeconds);
+            return elapsed.ToString();
         }
 
         private void Solve_Click(object sender, RoutedEventArgs e)
@@ -71,6 +88,20 @@ namespace FlowSolver
         private void Stop_Click(object sender, RoutedEventArgs e)
         {
             TokenSource.Cancel();
+        }
+
+        private void Edit_Click(object sender, RoutedEventArgs e)
+        {
+            if (Editor.Visibility == Visibility.Hidden)
+            {
+                Editor.Visibility = Visibility.Visible;
+                Edit.Content = "Edit (done)";
+            }
+            else
+            {
+                Editor.Visibility = Visibility.Hidden;
+                Edit.Content = "Edit";
+            }
         }
     }
 }
