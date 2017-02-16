@@ -62,12 +62,6 @@ namespace SolverCore
             Game.Reset();
         }
 
-        private Solver(Solver solver)
-        {
-            Token = solver.Token;
-            Game = new FlowBoard(solver.Game);
-        }
-
         public static Task<bool> Solve(FlowBoard board, CancellationToken ct)
         {
             return Task.Run(() => SolveBoard(board, ct));
