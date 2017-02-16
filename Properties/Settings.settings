@@ -1,7 +1,21 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="FlowSolver.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ToolKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">TdX2aWaU8HEsafKzHlkXjWx9gxZDvKH9SCm/33a40ksKvlCoDkDmYw==</Value>
+    </Setting>
+    <Setting Name="ProductionUploadUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://flowboards.azurewebsites.net/api/UploadFlow?code={toolKey}</Value>
+    </Setting>
+    <Setting Name="ProductionUploadResultsUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://flowboards.azurewebsites.net/api/query/{traceId}?code={toolKey}</Value>
+    </Setting>
+    <Setting Name="PreProductionUploadUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://flowpreproduction.azurewebsites.net/api/UploadFlow?code={toolKey}</Value>
+    </Setting>
+    <Setting Name="PreProductionUploadResultsUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://flowpreproduction.azurewebsites.net/api/query/{traceId}?code={toolKey}</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

@@ -8,22 +8,78 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FlowSolver.Properties
-{
-
-
+namespace FlowSolver.Properties {
+    
+    
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
-    {
-
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.0.1.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+        
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-
-        public static Settings Default
-        {
-            get
-            {
+        
+        public static Settings Default {
+            get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("TdX2aWaU8HEsafKzHlkXjWx9gxZDvKH9SCm/33a40ksKvlCoDkDmYw==")]
+        public string ToolKey {
+            get {
+                return ((string)(this["ToolKey"]));
+            }
+            set {
+                this["ToolKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://flowboards.azurewebsites.net/api/UploadFlow?code={toolKey}")]
+        public string ProductionUploadUrl {
+            get {
+                return ((string)(this["ProductionUploadUrl"]));
+            }
+            set {
+                this["ProductionUploadUrl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://flowboards.azurewebsites.net/api/query/{traceId}?code={toolKey}")]
+        public string ProductionUploadResultsUrl {
+            get {
+                return ((string)(this["ProductionUploadResultsUrl"]));
+            }
+            set {
+                this["ProductionUploadResultsUrl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://flowpreproduction.azurewebsites.net/api/UploadFlow?code={toolKey}")]
+        public string PreProductionUploadUrl {
+            get {
+                return ((string)(this["PreProductionUploadUrl"]));
+            }
+            set {
+                this["PreProductionUploadUrl"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://flowpreproduction.azurewebsites.net/api/query/{traceId}?code={toolKey}")]
+        public string PreProductionUploadResultsUrl {
+            get {
+                return ((string)(this["PreProductionUploadResultsUrl"]));
+            }
+            set {
+                this["PreProductionUploadResultsUrl"] = value;
             }
         }
     }
