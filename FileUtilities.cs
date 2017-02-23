@@ -25,8 +25,12 @@ namespace FlowSolver
                 return null;
             }
 
-            string text = File.ReadAllText(loadDialog.FileName);
-            return JsonConvert.DeserializeObject<T>(text);
+            return ReadJsonFile<T>(loadDialog.FileName);
+        }
+
+        public static T ReadJsonFile<T>(string filename) where T : class, new()
+        {
+            return JsonConvert.DeserializeObject<T>(File.ReadAllText(filename));
         }
 
         internal static void SaveAsJson<T>(T obj, string description, string fileExtension)
@@ -43,8 +47,12 @@ namespace FlowSolver
                 return;
             }
 
-            string json = JsonConvert.SerializeObject(obj);
-            File.WriteAllText(saveDialog.FileName, json);
+            obj.WriteJsonFile(saveDialog.FileName);
+        }
+
+        public static void WriteJsonFile<T>(this T obj, string filename)
+        {
+            File.WriteAllText(filename, JsonConvert.SerializeObject(obj));
         }
     }
 }
