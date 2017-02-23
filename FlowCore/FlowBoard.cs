@@ -47,7 +47,16 @@ namespace SolverCore
 
         public void InitializeBoard(BoardDefinition boardDefinition)
         {
-            Board = boardDefinition;
+            Board = boardDefinition ?? Board;
+
+            if (Board == null)
+            {
+                Width = 0;
+                Height = 0;
+                Puzzle = new List<Endpoints>();
+                Cells = new List<Cell>();
+                return;
+            }
 
             Width = Board.BoardSize;
             Height = Width;
