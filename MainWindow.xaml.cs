@@ -24,7 +24,7 @@ namespace FlowSolver
     public partial class MainWindow : Window
     {
         FlowBoard Game = new FlowBoard();
-        CancellationTokenSource TokenSource;
+        CancellationTokenSource TokenSource = new CancellationTokenSource();
 
         public MainWindow()
         {
@@ -39,23 +39,24 @@ namespace FlowSolver
             s.Start();
             try
             {
-                TokenSource = new CancellationTokenSource();
-                //TokenSource.CancelAfter(2 * 60 * 1000);
-                var timer = Task.Run(async () =>
+                TokenSource = new CancellationTokenSource(90 * 60 * 1000);
+
+                var timer = Task.Run(() =>
                 {
                     while (!TokenSource.Token.IsCancellationRequested)
                     {
-                        await Task.Delay(1000, TokenSource.Token);
+                        Thread.Sleep(1000);
                         string clockString = GetElapsedTime(s);
-                        var ignore = Dispatcher.BeginInvoke(new Action(() => { Clock.Text = clockString; }));
+                        var ignore = Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Send, new Action(() => { Clock.Text = clockString; }));
                     }
                 });
                 var task = await Solver.Solve(Game, TokenSource.Token);
+
                 TokenSource.Cancel();
             }
-            catch (OperationCanceledException cancelled)
+            catch (OperationCanceledException)
             {
-                Trace.WriteLine(cancelled.ToString());
+                Trace.WriteLine("Operation cancelled by user");
             }
             s.Stop();
             Trace.WriteLine($"took : {s.Elapsed}");
